@@ -79,8 +79,6 @@ def get_stream_url():
         "format": "bestaudio/best",
         "quiet": True,
         "noplaylist": True,
-        "cookiefile": "/tmp/cookies.txt",
-        "proxy": "socks5://83.147.216.208:1080",
 
         "sleep_interval_requests": 5,
         "sleep_interval": 15,
