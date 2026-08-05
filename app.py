@@ -70,10 +70,22 @@ def get_stream_url():
     ydl_opts = {
         'format': 'bestaudio/best',
         'quiet': True,
+        'sleep_interval': 10,
+        'max_sleep_interval': 30,
+        'ratelimit': 500000,
         'noplaylist': True,
+
         'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        }
+            'User-Agent': (
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                'AppleWebKit/537.36 (KHTML, like Gecko) '
+                'Chrome/120.0.0.0 Safari/537.36'
+            )
+        },
+
+        'retries': 10,
+        'fragment_retries': 10,
+        'extractor_retries': 5,
     }
 
     try:
