@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayerWib - Écoute</title>
+    <link rel="stylesheet" href="/static/player.css">
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+</head>
+<body>
+    <div class="main-container">
+        <div class="header-container">
+            <div class="header-container-title-icon">
+                <div class="header-title-container">
+                    <div id="header-icon-container">
+                        <img id="header-icon" src="/images/favicon.ico" alt="Logo">
+                    </div>
+                    <h1 id="header-title">PlayerWib</h1>
+                </div>
+                <div class="searchBtn-container">
+                    <button id="searchBtn" type="button">
+                        <img id="searchBtnImg" src="/images/searchBtnImg.png" alt="Search">
+                    </button>
+                    <input id="searchInput" type="text" placeholder="">
+                </div>
+            </div>
+            <div class="directions-container">
+                <a class="directions-text" href="/">Home</a>
+                <a class="directions-text" href="#">Albums</a>
+                <a class="directions-text" href="#">Artists</a>
+            </div>
+        </div>
+
+        <div class="player-container">
+            <div class="now-playing-card">
+                <img id="currentThumbnail" class="paused">
+                <div class="track-info">
+                    <h2 id="currentTitle">Recherchez une musique</h2>
+                    <p id="currentArtist"></p>
+                </div>
+                
+                <audio id="AudioPlayer"></audio>
+                <div class="control-progression">
+                    <div class="progress-bar-container">
+                        <p id="current-time">00:00</p>
+                        <input type="range" id="progress-range" min="0" max="100" value="0" step="0.1">
+                        <p id="end-time">00:00</p>
+                    </div>
+
+                    <div class="controls-container">
+                        <div class="favourite-container">
+                            <button class="control-btn play-pause" id="favouriteBtn" alt="Make the song one of your favourite">
+                                <img src="/images/favourite.png" id="Make the song one of your favourite"> 
+                            </button>
+                        </div>
+                        <button class="control-btn forward-backward" id="BackwardStepBtn" aria-label="Écoute précédente">
+                            <img src="/images/rewind-button.png" id="backward" alt="Écoute précédente">
+                        </button>
+                        <button class="control-btn forward-backward" id="Backtensecs" aria-label="10 secondes en arrière">
+                            <img src="/images/back10secs.png" id="tenSecsBack" aria-label="10 secondes en arrière">
+                        </button>
+                        <button class="control-btn play-pause" id="PauseBtn" aria-label="Play or Pause">
+                            <img src="/images/play.png" id="PauseImg" alt="Play">
+                        </button>
+                        <button class="control-btn forward-backward" id="Forwardtensecs" aria-label="10 secondes en avant">
+                            <img src="/images/forward10secs.png" id="tenSecsForward" aria-label="10 secondes en avant">
+                        </button>
+                        <button class="control-btn forward-backward" id="ForwardStepBtn" aria-label="Écoute suivante">
+                            <img src="/images/forward.png" id="forward" alt="Écoute suivante">
+                        </button>
+                        <div class="volume-container">
+                            <button class="control-btn play-pause" id="volumeBtn" alt="Volume">
+                                <img src="/images/max_volume.png" id="volume" alt="Le volume">
+                            </button>
+                        </div>
+                        <div class="random-play-container">
+                            <button class="control-btn play-pause" id="randomplayBtn" alt="Play some random songs">
+                                <img src="/images/random_play.png" id="randomplay" alt="Play some random songs"> 
+                            </button>
+                        </div>
+                        <div class="play-again-container">
+                            <button class="control-btn forward-backward" id="playagainBtn" alt="Play Again !">
+                                <img src="/images/loop.png" id="playagain" alt="Play again !"> 
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/player.js"></script>
+</body>
+</html>
