@@ -74,48 +74,47 @@ def get_stream_url():
         return jsonify({'status': 'error', 'message': 'ID manquant'}), 400
 
     video_id = data.get('id')
-    
-    piped_instances = [
-        "https://pipedapi.kavin.rocks",
-        "https://api.piped.privacydev.net",
-        "https://pipedapi.palvelintalo.fi",
-        "https://pipedapi.projectsegfau.lt",
-        "https://pipedapi.invidious.privacydev.net"
-    ]
+    video_url = f"https://www.youtube.com/watch?v={video_id}"
 
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+    ydl_opts = {
+        'format': 'm4a/bestaudio/best',
+        'quiet': True,
+        'noplaylist': True,
+        'cookiefile': COOKIE_PATH if os.path.exists(COOKIE_PATH) else None,
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['ios', 'android', 'web_embedded']
+            }
+        },
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15'
+        }
     }
 
-    for instance in piped_instances:
-        try:
-            response = requests.get(f"{instance}/streams/{video_id}", headers=headers, timeout=5)
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(video_url, download=False)
             
-            if response.status_code == 200:
-                info = response.json()
+            stream_url = info.get('url')
 
-                audio_streams = info.get('audioStreams', [])
-                if not audio_streams:
-                    continue
+            if not stream_url and 'formats' in info:
+                audio_formats = [f for f in info['formats'] if f.get('vcodec') == 'none']
+                stream_url = audio_formats[-1].get('url') if audio_formats else info['formats'][0].get('url')
 
-                audio_stream = audio_streams[0]
+            if not stream_url:
+                return jsonify({'status': 'error', 'message': 'Impossible d\'extraire le flux'}), 500
 
-                return jsonify({
-                    'status': 'success',
-                    'stream_url': audio_stream.get('url'),
-                    'title': info.get('title'),
-                    'channel': info.get('uploader') or 'Artiste inconnu',
-                    'thumbnail': info.get('thumbnailUrl')
-                })
-                
-        except Exception as err:
-            print(f"[PIPED ERROR - {instance}] : {err}")
-            continue
+            return jsonify({
+                'status': 'success',
+                'stream_url': stream_url,
+                'title': info.get('title'),
+                'channel': info.get('channel') or info.get('uploader') or 'Artiste inconnu',
+                'thumbnail': info.get('thumbnail')
+            })
 
-    return jsonify({
-        'status': 'error', 
-        'message': 'Impossible d\'extraire le flux audio pour le moment'
-    }), 500
+    except Exception as e:
+        print(f"[YTDLP STREAM ERROR]: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
