@@ -77,9 +77,10 @@ def get_stream_url():
     
     piped_instances = [
         "https://pipedapi.kavin.rocks",
-        "https://pipedapi.syncpundit.io",
-        "https://piped-api.garudalinux.org",
-        "https://pipedapi.mha.fi"
+        "https://api.piped.privacydev.net",
+        "https://pipedapi.palvelintalo.fi",
+        "https://pipedapi.projectsegfau.lt",
+        "https://pipedapi.invidious.privacydev.net"
     ]
 
     headers = {
