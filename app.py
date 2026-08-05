@@ -5,13 +5,6 @@ import os
 
 app = Flask(__name__)
 
-
-COOKIE_PATH = "/tmp/cookies.txt"
-if "YOUTUBE_COOKIES" in os.environ:
-    with open(COOKIE_PATH, "w") as f:
-        f.write(os.environ["YOUTUBE_COOKIES"])
-
-
 @app.route("/")
 @app.route("/search")
 def main():
@@ -64,7 +57,6 @@ def search_youtube():
         print(f"Error: {e}")
         return jsonify({'error': str(e)}), 500
 
-
 @app.route('/api/stream', methods=['POST'])
 def get_stream_url():
     data = request.get_json()
@@ -76,49 +68,38 @@ def get_stream_url():
     video_url = f"https://www.youtube.com/watch?v={video_id}"
 
     ydl_opts = {
-        "format": "bestaudio/best",
-        "quiet": True,
-        "noplaylist": True,
-
-        "proxy": "socks5://144.91.111.48:1088",
-
-        "extractor_args": {
-            "youtube": {
-                "player_client": ["android"]
-            }
-        },
-
-        "retries": 10,
-        "fragment_retries": 10,
+        'format': 'bestaudio/best',
+        'quiet': True,
+        'noplaylist': True,
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
     }
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(video_url, download=False)
+            
             stream_url = info.get('url')
 
             if not stream_url and 'formats' in info:
-                valid_formats = [f for f in info['formats'] if f.get('url')]
-                audio_formats = [f for f in valid_formats if f.get('vcodec') == 'none']
-                
-                if audio_formats:
-                    stream_url = audio_formats[-1].get('url')
-                elif valid_formats:
-                    stream_url = valid_formats[0].get('url')
+                stream_url = info['formats'][0].get('url')
 
             if not stream_url:
                 return jsonify({'status': 'error', 'message': 'Impossible d\'extraire le flux'}), 500
+
+            thumbnail = info.get('thumbnail')
 
             return jsonify({
                 'status': 'success',
                 'stream_url': stream_url,
                 'title': info.get('title'),
                 'channel': info.get('channel') or info.get('uploader') or 'Artiste inconnu',
-                'thumbnail': info.get('thumbnail')
+                'thumbnail': thumbnail
             })
 
     except Exception as e:
-        print(f"[YTDLP STREAM ERROR]: {e}")
+        print(f"Error : {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 if __name__ == "__main__":
