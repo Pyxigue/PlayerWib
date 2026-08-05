@@ -3,6 +3,14 @@ import yt_dlp
 from yt_dlp import YoutubeDL
 import os
 
+
+cookies = os.environ.get("YOUTUBE_COOKIES")
+
+if cookies:
+    with open("/tmp/cookies.txt", "w") as f:
+        f.write(cookies)
+
+
 app = Flask(__name__)
 
 @app.route("/")
@@ -68,24 +76,19 @@ def get_stream_url():
     video_url = f"https://www.youtube.com/watch?v={video_id}"
 
     ydl_opts = {
-        'format': 'bestaudio/best',
-        'quiet': True,
-        'sleep_interval': 10,
-        'max_sleep_interval': 30,
-        'ratelimit': 500000,
-        'noplaylist': True,
+        "format": "bestaudio/best",
+        "quiet": True,
+        "noplaylist": True,
 
-        'http_headers': {
-            'User-Agent': (
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                'AppleWebKit/537.36 (KHTML, like Gecko) '
-                'Chrome/120.0.0.0 Safari/537.36'
-            )
+        "cookiefile": "/tmp/cookies.txt",
+
+        "js_runtimes": {
+            "deno": "/root/.deno/bin/deno"
         },
 
-        'retries': 10,
-        'fragment_retries': 10,
-        'extractor_retries': 5,
+        "sleep_interval": 5,
+        "max_sleep_interval": 15,
+        "retries": 10,
     }
 
     try:
