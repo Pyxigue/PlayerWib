@@ -82,10 +82,6 @@ def get_stream_url():
 
         "cookiefile": "/tmp/cookies.txt",
 
-        "js_runtimes": {
-            "deno": "/root/.deno/bin/deno"
-        },
-
         "sleep_interval": 5,
         "max_sleep_interval": 15,
         "retries": 10,
