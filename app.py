@@ -76,17 +76,17 @@ def get_stream_url():
     video_url = f"https://www.youtube.com/watch?v={video_id}"
 
     ydl_opts = {
-        'format': 'm4a/bestaudio/best',
+        'format': 'ba/bestaudio/best', 
         'quiet': True,
         'noplaylist': True,
         'cookiefile': COOKIE_PATH if os.path.exists(COOKIE_PATH) else None,
         'extractor_args': {
             'youtube': {
-                'player_client': ['tv', 'mweb']
+                'player_client': ['android', 'ios', 'web']
             }
         },
         'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (SmartHub; SMART-TV; U; Linux/SmartTV) AppleWebKit/537.42'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         }
     }
 
@@ -96,8 +96,13 @@ def get_stream_url():
             stream_url = info.get('url')
 
             if not stream_url and 'formats' in info:
-                audio_formats = [f for f in info['formats'] if f.get('vcodec') == 'none']
-                stream_url = audio_formats[-1].get('url') if audio_formats else info['formats'][0].get('url')
+                valid_formats = [f for f in info['formats'] if f.get('url')]
+                audio_formats = [f for f in valid_formats if f.get('vcodec') == 'none']
+                
+                if audio_formats:
+                    stream_url = audio_formats[-1].get('url')
+                elif valid_formats:
+                    stream_url = valid_formats[0].get('url')
 
             if not stream_url:
                 return jsonify({'status': 'error', 'message': 'Impossible d\'extraire le flux'}), 500
