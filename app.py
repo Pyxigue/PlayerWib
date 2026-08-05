@@ -79,15 +79,15 @@ def get_stream_url():
         "format": "bestaudio/best",
         "quiet": True,
         "noplaylist": True,
-        "cookiefile": COOKIE_PATH if os.path.exists(COOKIE_PATH) else None,
+
+        "proxy": "socks5://144.91.111.48:1088",
 
         "extractor_args": {
             "youtube": {
-                "player_client": ["android", "web"]
+                "player_client": ["android"]
             }
         },
 
-        "sleep_interval_requests": 3,
         "retries": 10,
         "fragment_retries": 10,
     }
