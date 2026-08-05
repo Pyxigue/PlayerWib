@@ -82,18 +82,17 @@ def get_stream_url():
         'cookiefile': COOKIE_PATH if os.path.exists(COOKIE_PATH) else None,
         'extractor_args': {
             'youtube': {
-                'player_client': ['ios', 'mweb']
+                'player_client': ['tv', 'mweb']
             }
         },
         'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15'
+            'User-Agent': 'Mozilla/5.0 (SmartHub; SMART-TV; U; Linux/SmartTV) AppleWebKit/537.42'
         }
     }
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(video_url, download=False)
-            
             stream_url = info.get('url')
 
             if not stream_url and 'formats' in info:
