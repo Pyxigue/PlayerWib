@@ -2,7 +2,6 @@ from flask import Flask, render_template, send_from_directory, request, jsonify,
 import yt_dlp
 from yt_dlp import YoutubeDL
 import os
-import requests
 
 app = Flask(__name__)
 
@@ -83,7 +82,7 @@ def get_stream_url():
         'cookiefile': COOKIE_PATH if os.path.exists(COOKIE_PATH) else None,
         'extractor_args': {
             'youtube': {
-                'player_client': ['ios', 'android', 'web_embedded']
+                'player_client': ['ios', 'mweb']
             }
         },
         'http_headers': {
