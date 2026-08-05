@@ -82,9 +82,13 @@ def get_stream_url():
 
         "cookiefile": "/tmp/cookies.txt",
 
-        "sleep_interval": 5,
-        "max_sleep_interval": 15,
-        "retries": 10,
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["android"]
+            }
+        },
+
+        "retries": 5,
     }
 
     try:
