@@ -81,11 +81,12 @@ def get_stream_url():
         "noplaylist": True,
         "cookiefile": "/tmp/cookies.txt",
 
-        "extractor_args": {
-            "youtube": {
-                "player_client": ["web"]
-            }
-        }
+        "sleep_interval_requests": 5,
+        "sleep_interval": 15,
+        "max_sleep_interval": 45,
+
+        "retries": 10,
+        "fragment_retries": 10,
     }
 
     try:
