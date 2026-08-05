@@ -5,6 +5,13 @@ import os
 
 app = Flask(__name__)
 
+
+COOKIE_PATH = "/tmp/cookies.txt"
+if "YOUTUBE_COOKIES" in os.environ:
+    with open(COOKIE_PATH, "w") as f:
+        f.write(os.environ["YOUTUBE_COOKIES"])
+
+
 @app.route("/")
 @app.route("/search")
 def main():
@@ -71,6 +78,7 @@ def get_stream_url():
             'format': 'm4a/bestaudio/best',
             'quiet': True,
             'noplaylist': True,
+            'cookiefile': COOKIE_PATH if os.path.exists(COOKIE_PATH) else None,
             'extractor_args': {
                 'youtube': {
                     'player_client': ['ios', 'android']
