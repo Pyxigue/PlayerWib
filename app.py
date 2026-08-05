@@ -68,14 +68,14 @@ def get_stream_url():
     video_url = f"https://www.youtube.com/watch?v={video_id}"
 
     ydl_opts = {
-        'format': 'ba/ba*',
-        'quiet': True,
-        'noplaylist': True,
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['ios', 'android', 'web']
-            }
-        },
+            'format': 'm4a/bestaudio/best',
+            'quiet': True,
+            'noplaylist': True,
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['ios', 'android']
+                }
+            },
         'http_headers': {
             'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1'
         }
