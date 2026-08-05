@@ -76,18 +76,20 @@ def get_stream_url():
     video_url = f"https://www.youtube.com/watch?v={video_id}"
 
     ydl_opts = {
-        'format': 'ba/bestaudio/best',
-        'quiet': True,
-        'noplaylist': True,
-        'cookiefile': COOKIE_PATH if os.path.exists(COOKIE_PATH) else None,
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['web_creator', 'mweb']
+        "format": "bestaudio/best",
+        "quiet": True,
+        "noplaylist": True,
+        "cookiefile": COOKIE_PATH if os.path.exists(COOKIE_PATH) else None,
+
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["android", "web"]
             }
         },
-        'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
-        }
+
+        "sleep_interval_requests": 3,
+        "retries": 10,
+        "fragment_retries": 10,
     }
 
     try:
