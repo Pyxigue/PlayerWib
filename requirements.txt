@@ -2,3 +2,5 @@ yt_dlp
 flask
 gunicorn
 yt-dlp-ejs
+PyExecJS
+quickjs
