@@ -35,6 +35,7 @@ def search_youtube():
         'skip_download': True,
         'quiet': True,
         'cookiefile': COOKIE_PATH,
+        "cookiefile_read_only": True,
         'nocheckcertificate': True,
         'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     }
@@ -83,6 +84,7 @@ def get_stream_url():
         "quiet": True,
         "noplaylist": True,
         "cookiefile": COOKIE_PATH,
+        "cookiefile_read_only": True,
         "nocheckcertificate": True,
         "geo_bypass": True,
         "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
