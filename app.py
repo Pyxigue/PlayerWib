@@ -88,7 +88,6 @@ def search_youtube():
         print(f"Error search: {e}")
         return jsonify({'error': str(e)}), 500
 
-    
 
 @app.route('/api/stream', methods=['POST'])
 def get_stream_url():
@@ -97,37 +96,42 @@ def get_stream_url():
         return jsonify({'status': 'error', 'message': 'ID manquant'}), 400
 
     video_id = data.get('id')
-    video_url = f"https://www.youtube.com/watch?v={video_id}"
 
-    try:
-        response = requests.post(
-            "https://co.wuk.sh/api/json",
-            headers={
-                "Accept": "application/json",
-                "Content-Type": "application/json"
-            },
-            json={
-                "url": video_url,
-                "isAudioOnly": True,
-                "aFormat": "mp3"
-            },
-            timeout=10
-        )
-        res_data = response.json()
+    # Liste d'instances de secours (si une est temporairement indisponible, on passe à la suivante)
+    invidious_instances = [
+        "https://inv.riverside.rocks",
+        "https://invidious.nerdvpn.de",
+        "https://yewtu.be",
+        "https://invidious.drgns.space"
+    ]
 
-        if response.status_code == 200 and res_data.get("url"):
-            return jsonify({
-                'status': 'success',
-                'stream_url': res_data.get("url"),
-                'title': 'Lecture audio',
-                'channel': 'YouTube'
-            })
-        else:
-            return jsonify({'status': 'error', 'message': 'Impossible d\'obtenir le flux via l\'API'}), 500
+    for instance in invidious_instances:
+        try:
+            url = f"{instance}/api/v1/videos/{video_id}"
+            response = requests.get(url, timeout=5)
 
-    except Exception as e:
-        print(f"Error stream Cobalt: {e}")
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+            if response.status_code == 200:
+                video_data = response.json()
+                adaptive_formats = video_data.get('adaptiveFormats', [])
+                audio_streams = [
+                    fmt for fmt in adaptive_formats 
+                    if fmt.get('type', '').startswith('audio/')
+                ]
+
+                if audio_streams:
+                    stream_url = audio_streams[0].get('url')
+                    return jsonify({
+                        'status': 'success',
+                        'stream_url': stream_url,
+                        'title': video_data.get('title'),
+                        'channel': video_data.get('author'),
+                        'thumbnail': video_data.get('videoThumbnails', [{}])[-1].get('url')
+                    })
+        except Exception as e:
+            print(f"Échec avec l'instance {instance}: {e}")
+            continue 
+
+    return jsonify({'status': 'error', 'message': 'Impossible de récupérer le flux audio depuis les API de secours.'}), 500
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
