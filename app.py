@@ -73,8 +73,6 @@ def get_stream_url():
         "quiet": True,
         "noplaylist": True,
         "cookiefile": "cookies.txt",
-        'extract_flat': True,
-        'skip_download': True,
         "sleep_interval_requests": 5,
         "sleep_interval": 15,
         "max_sleep_interval": 45,
