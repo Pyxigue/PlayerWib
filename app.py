@@ -101,19 +101,17 @@ def get_stream_url():
     
     cookie_file = get_cookie_path()
 
-    ydl_opts = {
+    ydl_opts = { 
         "format": "bestaudio/best",
         "quiet": True,
         "noplaylist": True,
         "nocheckcertificate": True,
         "geo_bypass": True,
         "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        
-        # 🔹 Contournement PO Token : Utiliser des clients embedded/tvhtml5
         "extractor_args": {
             "youtube": {
-                "player_client": ["tv_embedded", "android_vr", "mweb"],
-                "skip": ["dash", "hls"]
+                "player_client": ["web_embedded", "mweb"],
+                "player_skip": ["js", "configs"]
             }
         }
     }
