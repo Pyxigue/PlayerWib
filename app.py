@@ -75,13 +75,15 @@ def get_stream_url():
         "cookiefile": "cookies.txt",
         "extractor_args": {
             "youtube": {
-                "player_client": ["web_creator", "ios", "mweb"]
+                "player_client": ["tv", "android"]
             }
         },
         "nocheckcertificate": True,
         "geo_bypass": True,
+        "retries": 10,
+        "fragment_retries": 10,
     }
-
+    
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(video_url, download=False)
