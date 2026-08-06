@@ -1,7 +1,9 @@
+import os
+import shutil
+import requests
 from flask import Flask, render_template, send_from_directory, request, jsonify
 import yt_dlp
-from yt_dlp import YoutubeDL
-import os, shutil
+
 
 app = Flask(__name__)
 
@@ -9,12 +11,12 @@ app = Flask(__name__)
 def get_cookie_path():
     secret_path = "/etc/secrets/cookies.txt"
     tmp_path = "/tmp/cookies.txt"
+    
     if os.path.exists(secret_path):
         shutil.copyfile(secret_path, tmp_path)
         return tmp_path
 
     return "cookies.txt" if os.path.exists("cookies.txt") else None
-
 
 
 @app.route("/")
@@ -35,48 +37,55 @@ def listen():
 @app.route('/api/search', methods=['GET'])
 def search_youtube():
     query = request.args.get('q')
+
     if not query or not query.strip():
         return jsonify({'videos': []})
 
-    cookie_file = get_cookie_path()
+    api_key = os.getenv("YOUTUBE_API_KEY")
 
-    ydl_opts = {
-        'extract_flat': True,
-        'skip_download': True,
-        'quiet': True,
-        'nocheckcertificate': True,
-        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    if not api_key:
+        print("Erreur: Clé YOUTUBE_API_KEY non configurée")
+        return jsonify({'error': 'Clé API non configurée'}), 500
+
+    url = "https://www.googleapis.com/youtube/v3/search"
+    params = {
+        'part': 'snippet',
+        'q': query.strip(),
+        'type': 'video',
+        'maxResults': 10,
+        'key': api_key
     }
 
-    if cookie_file:
-        ydl_opts['cookiefile'] = cookie_file
-
     try:
-        with YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(f"ytsearch10:{query.strip()}", download=False)
-            if not info or 'entries' not in info:
-                return jsonify({'videos': []})
+        response = requests.get(url, params=params)
+        data = response.json()
 
-            cleaned_results = []
-            for entry in info.get('entries', []):
-                if not entry:
-                    continue
-                thumbnails = entry.get('thumbnails', [])
-                thumbnail_url = thumbnails[-1]['url'] if thumbnails else None
+        if response.status_code != 200:
+            print(f"Erreur API YouTube: {data}")
+            return jsonify({'error': 'Erreur lors de la recherche'}), 500
 
+        cleaned_results = []
+        for item in data.get('items', []):
+            snippet = item.get('snippet', {})
+            video_id = item.get('id', {}).get('videoId')
+
+            if video_id:
+                thumbnails = snippet.get('thumbnails', {})
+                # Récupère la meilleure résolution de miniature disponible
+                thumb_data = thumbnails.get('high') or thumbnails.get('medium') or thumbnails.get('default') or {}
+                
                 cleaned_results.append({
-                    'id': entry.get('id'),
-                    'title': entry.get('title'),
-                    'link': entry.get('url') or f"https://www.youtube.com/watch?v={entry.get('id')}",
-                    'thumbnail': thumbnail_url,
-                    'duration': entry.get('duration'),
-                    'channel': entry.get('uploader')
+                    'id': video_id,
+                    'title': snippet.get('title'),
+                    'link': f"https://www.youtube.com/watch?v={video_id}",
+                    'thumbnail': thumb_data.get('url'),
+                    'channel': snippet.get('channelTitle')
                 })
 
-            return jsonify({'videos': cleaned_results})
+        return jsonify({'videos': cleaned_results})
 
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error search: {e}")
         return jsonify({'error': str(e)}), 500
 
     
@@ -90,7 +99,6 @@ def get_stream_url():
     video_id = data.get('id')
     video_url = f"https://www.youtube.com/watch?v={video_id}"
     
-    # Récupération du chemin des cookies (copié dans /tmp pour éviter l'erreur Read-Only)
     cookie_file = get_cookie_path()
 
     ydl_opts = {
@@ -100,7 +108,6 @@ def get_stream_url():
         "nocheckcertificate": True,
         "geo_bypass": True,
         "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        # Force des clients stables pour éviter SABR et PO-Token
         "extractor_args": {
             "youtube": {
                 "player_client": ["mweb", "web"]
@@ -108,7 +115,6 @@ def get_stream_url():
         }
     }
 
-    # Si le fichier cookie existe dans /tmp ou localement, on l'injecte
     if cookie_file:
         ydl_opts["cookiefile"] = cookie_file
 
@@ -116,13 +122,11 @@ def get_stream_url():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(video_url, download=False)
             
-            # 🛡️ Protection contre l'erreur 403 / NoneType
             if not info:
-                return jsonify({'status': 'error', 'message': 'Impossible d\'extraire les infos (IP bloquée ou vidéo indisponible)'}), 500
+                return jsonify({'status': 'error', 'message': 'Impossible de lire les informations de la vidéo'}), 500
 
             stream_url = info.get('url')
 
-            # Si le lien direct n'est pas à la racine, on va le chercher dans les formats
             if not stream_url and 'formats' in info and info['formats']:
                 for fmt in info['formats']:
                     if fmt.get('acodec') != 'none' and fmt.get('url'):
@@ -132,18 +136,16 @@ def get_stream_url():
             if not stream_url:
                 return jsonify({'status': 'error', 'message': 'Impossible d\'extraire le flux audio'}), 500
 
-            thumbnail = info.get('thumbnail')
-
             return jsonify({
                 'status': 'success',
                 'stream_url': stream_url,
                 'title': info.get('title'),
                 'channel': info.get('channel') or info.get('uploader') or 'Artiste inconnu',
-                'thumbnail': thumbnail
+                'thumbnail': info.get('thumbnail')
             })
 
     except Exception as e:
-        print(f"Error : {e}")
+        print(f"Error stream : {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 if __name__ == "__main__":
