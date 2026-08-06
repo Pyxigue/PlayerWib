@@ -74,15 +74,12 @@ def get_stream_url():
         "noplaylist": True,
         "cookiefile": "cookies.txt",
         "extractor_args": {
-                "youtube": {
-                    "player_client": ["android", "ios"]
-                }
-            },
-        "sleep_interval_requests": 5,
-        "sleep_interval": 15,
-        "max_sleep_interval": 45,
-        "retries": 10,
-        "fragment_retries": 10,
+            "youtube": {
+                "player_client": ["web_creator", "ios", "mweb"]
+            }
+        },
+        "nocheckcertificate": True,
+        "geo_bypass": True,
     }
 
     try:
