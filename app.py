@@ -45,8 +45,7 @@ def search_youtube():
     api_key = os.getenv("YOUTUBE_API_KEY")
 
     if not api_key:
-        print("Erreur: Clé YOUTUBE_API_KEY non configurée")
-        return jsonify({'error': 'Clé API non configurée'}), 500
+        return jsonify({'error': 'API NOT FOUND'}), 500
 
     url = "https://www.googleapis.com/youtube/v3/search"
     params = {
@@ -62,8 +61,8 @@ def search_youtube():
         data = response.json()
 
         if response.status_code != 200:
-            print(f"Erreur API YouTube: {data}")
-            return jsonify({'error': 'Erreur lors de la recherche'}), 500
+            print(f"Error: {data}")
+            return jsonify({'error': 'SEARCH API ERR0R'}), 500
 
         cleaned_results = []
         for item in data.get('items', []):
@@ -85,7 +84,7 @@ def search_youtube():
         return jsonify({'videos': cleaned_results})
 
     except Exception as e:
-        print(f"Error search: {e}")
+        print(f"Error SEARCH: {e}")
         return jsonify({'error': str(e)}), 500
 
 
@@ -96,42 +95,37 @@ def get_stream_url():
         return jsonify({'status': 'error', 'message': 'ID manquant'}), 400
 
     video_id = data.get('id')
+    video_url = f"https://www.youtube.com/watch?v={video_id}"
 
-    # Liste d'instances de secours (si une est temporairement indisponible, on passe à la suivante)
-    invidious_instances = [
-        "https://inv.riverside.rocks",
-        "https://invidious.nerdvpn.de",
-        "https://yewtu.be",
-        "https://invidious.drgns.space"
-    ]
+    cookie_path = get_cookie_path()
 
-    for instance in invidious_instances:
-        try:
-            url = f"{instance}/api/v1/videos/{video_id}"
-            response = requests.get(url, timeout=5)
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'quiet': True,
+        'no_warnings': True,
+    }
 
-            if response.status_code == 200:
-                video_data = response.json()
-                adaptive_formats = video_data.get('adaptiveFormats', [])
-                audio_streams = [
-                    fmt for fmt in adaptive_formats 
-                    if fmt.get('type', '').startswith('audio/')
-                ]
+    if cookie_path:
+        ydl_opts['cookiefile'] = cookie_path
 
-                if audio_streams:
-                    stream_url = audio_streams[0].get('url')
-                    return jsonify({
-                        'status': 'success',
-                        'stream_url': stream_url,
-                        'title': video_data.get('title'),
-                        'channel': video_data.get('author'),
-                        'thumbnail': video_data.get('videoThumbnails', [{}])[-1].get('url')
-                    })
-        except Exception as e:
-            print(f"Échec avec l'instance {instance}: {e}")
-            continue 
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(video_url, download=False)
+            
+            return jsonify({
+                'status': 'success',
+                'stream_url': info.get('url'),
+                'title': info.get('title'),
+                'channel': info.get('uploader'),
+                'thumbnail': info.get('thumbnail')
+            })
 
-    return jsonify({'status': 'error', 'message': 'Impossible de récupérer le flux audio depuis les API de secours.'}), 500
+    except Exception as e:
+        print(f"Erreur yt-dlp: {e}")
+        return jsonify({
+            'status': 'error', 
+            'message': f"Impossible de récupérer le flux audio: {str(e)}"
+        }), 500
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
