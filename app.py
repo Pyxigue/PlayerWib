@@ -3,6 +3,7 @@ import shutil
 import requests
 from flask import Flask, render_template, send_from_directory, request, jsonify
 import yt_dlp
+import requests
 
 
 app = Flask(__name__)
@@ -71,7 +72,6 @@ def search_youtube():
 
             if video_id:
                 thumbnails = snippet.get('thumbnails', {})
-                # Récupère la meilleure résolution de miniature disponible
                 thumb_data = thumbnails.get('high') or thumbnails.get('medium') or thumbnails.get('default') or {}
                 
                 cleaned_results.append({
@@ -89,63 +89,44 @@ def search_youtube():
         return jsonify({'error': str(e)}), 500
 
     
+
 @app.route('/api/stream', methods=['POST'])
 def get_stream_url():
     data = request.get_json()
-    
     if not data or 'id' not in data:
         return jsonify({'status': 'error', 'message': 'ID manquant'}), 400
 
     video_id = data.get('id')
     video_url = f"https://www.youtube.com/watch?v={video_id}"
-    
-    cookie_file = get_cookie_path()
-
-    ydl_opts = {
-        "format": "bestaudio/best",
-        "quiet": True,
-        "noplaylist": True,
-        "nocheckcertificate": True,
-        "geo_bypass": True,
-        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "extractor_args": {
-            "youtube": {
-                "player_client": ["music", "android", "mweb"]
-            }
-        }
-    }
-
-    if cookie_file:
-        ydl_opts["cookiefile"] = cookie_file
 
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(video_url, download=False)
-            
-            if not info:
-                return jsonify({'status': 'error', 'message': 'Impossible de lire les informations'}), 500
+        response = requests.post(
+            "https://co.wuk.sh/api/json",
+            headers={
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            },
+            json={
+                "url": video_url,
+                "isAudioOnly": True,
+                "aFormat": "mp3"
+            },
+            timeout=10
+        )
+        res_data = response.json()
 
-            stream_url = info.get('url')
-
-            if not stream_url and 'formats' in info and info['formats']:
-                for fmt in info['formats']:
-                    if fmt.get('url') and (fmt.get('acodec') != 'none' or fmt.get('vcodec') != 'none'):
-                        stream_url = fmt.get('url')
-                        break
-
-            if not stream_url:
-                return jsonify({'status': 'error', 'message': 'Flux audio introuvable'}), 500
-
+        if response.status_code == 200 and res_data.get("url"):
             return jsonify({
                 'status': 'success',
-                'stream_url': stream_url,
-                'title': info.get('title'),
-                'channel': info.get('channel') or info.get('uploader') or 'Artiste inconnu',
-                'thumbnail': info.get('thumbnail')
+                'stream_url': res_data.get("url"),
+                'title': 'Lecture audio',
+                'channel': 'YouTube'
             })
+        else:
+            return jsonify({'status': 'error', 'message': 'Impossible d\'obtenir le flux via l\'API'}), 500
 
     except Exception as e:
-        print(f"Error stream : {e}")
+        print(f"Error stream Cobalt: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 if __name__ == "__main__":
