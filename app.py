@@ -108,9 +108,12 @@ def get_stream_url():
         "nocheckcertificate": True,
         "geo_bypass": True,
         "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        
+        # 🔹 Contournement PO Token : Utiliser des clients embedded/tvhtml5
         "extractor_args": {
             "youtube": {
-                "player_client": ["mweb", "web"]
+                "player_client": ["tv_embedded", "android_vr", "mweb"],
+                "skip": ["dash", "hls"]
             }
         }
     }
@@ -123,18 +126,18 @@ def get_stream_url():
             info = ydl.extract_info(video_url, download=False)
             
             if not info:
-                return jsonify({'status': 'error', 'message': 'Impossible de lire les informations de la vidéo'}), 500
+                return jsonify({'status': 'error', 'message': 'Impossible de lire les informations'}), 500
 
             stream_url = info.get('url')
 
             if not stream_url and 'formats' in info and info['formats']:
                 for fmt in info['formats']:
-                    if fmt.get('acodec') != 'none' and fmt.get('url'):
+                    if fmt.get('url') and (fmt.get('acodec') != 'none' or fmt.get('vcodec') != 'none'):
                         stream_url = fmt.get('url')
                         break
 
             if not stream_url:
-                return jsonify({'status': 'error', 'message': 'Impossible d\'extraire le flux audio'}), 500
+                return jsonify({'status': 'error', 'message': 'Flux audio introuvable'}), 500
 
             return jsonify({
                 'status': 'success',
