@@ -16,6 +16,10 @@ const progressRange = document.getElementById("progress-range");
 const currentTimeEl = document.getElementById("current-time");
 const endTimeEl = document.getElementById("end-time");
 
+const volumeContainer = document.querySelector(".volume-container");
+const volumeIndicatorContainer = document.getElementById("VolumeControlInput");
+
+
 const rewindBtn = document.getElementById("Backtensecs");
 const forwardBtn = document.getElementById("Forwardtensecs");
 
@@ -248,6 +252,7 @@ PauseBtn.addEventListener("click", async () => {
 
 AudioPlayer.addEventListener("ended", () => {
     PauseImg.src = "/images/play.png";
+    currentThumbnail.classList.add("paused");
 });
 
 
@@ -351,3 +356,11 @@ progressRange.addEventListener("input", () => {
     }
 });
 
+
+volumeContainer.addEventListener("mousemove", () => {
+    volumeIndicatorContainer.classList.add("active");
+});
+
+volumeContainer.addEventListener("mouseleave", () => {
+    volumeIndicatorContainer.classList.remove("active");
+});

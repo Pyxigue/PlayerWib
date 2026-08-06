@@ -352,16 +352,57 @@ body {
 .volume-container {
     position: absolute;
     right: 0;
+    width: 55px;
+    transition: width 0.6s ease, transform 0.6s ease; 
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.volume-container:hover {
+    width: 200px;
+    transform: translateX(145px);
 }
 
 #volumeBtn {
-    display: inline-block;
-    transform-origin: center center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    flex-shrink: 0;
+    filter: drop-shadow(0px 0px 7px rgba(255, 255, 255, 0.4));
 }
 
 #volumeBtn:hover {
     animation: volume_shock 0.8s ease-in-out;
+    filter: drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.4));
 }
+
+
+#VolumeControlInput {
+    display: none;
+    margin-left: 10px;
+    width: 100px;
+    cursor: pointer;
+    accent-color: rgb(255, 255, 255);
+}
+
+#VolumeControlInput::-webkit-slider-thumb {
+    transition: 0.2s ease;
+}
+
+#VolumeControlInput::-webkit-slider-thumb:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0px 0px 8px #ffffff);
+}
+
+
+#VolumeControlInput.active {
+    display: block;
+}
+
 
 @keyframes volume_shock {
     0%   { transform: rotateZ(0deg); }
@@ -369,6 +410,7 @@ body {
     80%  { transform: rotateZ(-7.5deg); }
     100% { transform: rotateZ(0deg); }
 }
+
 
 #favouriteBtn {
     display:inline-block;
@@ -450,7 +492,6 @@ body {
     text-overflow: ellipsis; 
 }
 
-
 .forward-backward {
     width: 44px;
     height: 44px;
@@ -530,4 +571,3 @@ body {
 .control-btn:hover {
     filter: drop-shadow(0px 10px 25px rgba(255, 255, 255, 0.7));
 }
-

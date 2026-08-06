@@ -1,14 +1,7 @@
-from flask import Flask, render_template, send_from_directory, request, jsonify, redirect, url_for
+from flask import Flask, render_template, send_from_directory, request, jsonify
 import yt_dlp
 from yt_dlp import YoutubeDL
 import os
-
-
-cookies = os.environ.get("YOUTUBE_COOKIES")
-
-if cookies:
-    with open("/tmp/cookies.txt", "w") as f:
-        f.write(cookies)
 
 
 app = Flask(__name__)
@@ -79,11 +72,11 @@ def get_stream_url():
         "format": "bestaudio/best",
         "quiet": True,
         "noplaylist": True,
-
+        "cookiefile": "cookies.txt",
+        "proxy": "http://146.59.16.47:8888",
         "sleep_interval_requests": 5,
         "sleep_interval": 15,
         "max_sleep_interval": 45,
-
         "retries": 10,
         "fragment_retries": 10,
     }
