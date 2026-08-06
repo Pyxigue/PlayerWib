@@ -73,7 +73,7 @@ def get_stream_url():
         "quiet": True,
         "noplaylist": True,
         "cookiefile": "cookies.txt",
-        "proxy": "http://146.59.16.47:8888",
+        "proxy": "http://109.172.55.227:1082",
         "sleep_interval_requests": 5,
         "sleep_interval": 15,
         "max_sleep_interval": 45,
